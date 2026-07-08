@@ -1,4 +1,4 @@
-package com.viraj.digitalmarketingagencybackend.common;
+package com.viraj.digitalmarketingagencybackend.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

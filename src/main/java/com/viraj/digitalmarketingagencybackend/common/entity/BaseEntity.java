@@ -1,4 +1,4 @@
-package com.viraj.digitalmarketingagencybackend.common;
+package com.viraj.digitalmarketingagencybackend.common.entity;
 
 import lombok.Getter;
 import lombok.Setter;

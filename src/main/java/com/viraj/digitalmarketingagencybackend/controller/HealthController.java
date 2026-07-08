@@ -1,6 +1,6 @@
 package com.viraj.digitalmarketingagencybackend.controller;
 
-import com.viraj.digitalmarketingagencybackend.common.ApiResponse;
+import com.viraj.digitalmarketingagencybackend.common.response.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

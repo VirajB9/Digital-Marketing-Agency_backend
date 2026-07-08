@@ -1,6 +1,6 @@
 package com.viraj.digitalmarketingagencybackend.exception;
 
-import com.viraj.digitalmarketingagencybackend.common.ApiResponse;
+import com.viraj.digitalmarketingagencybackend.common.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
