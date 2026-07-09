@@ -48,13 +48,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
 
+        ex.printStackTrace();
+
         ApiResponse<Object> response = new ApiResponse<>(
                 false,
-                "Something went wrong",
+                ex.getMessage(),
                 null
         );
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 }

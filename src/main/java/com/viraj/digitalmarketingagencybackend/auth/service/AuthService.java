@@ -7,6 +7,7 @@ import com.viraj.digitalmarketingagencybackend.auth.entity.Role;
 import com.viraj.digitalmarketingagencybackend.auth.entity.User;
 import com.viraj.digitalmarketingagencybackend.auth.repository.RoleRepository;
 import com.viraj.digitalmarketingagencybackend.auth.repository.UserRepository;
+import com.viraj.digitalmarketingagencybackend.auth.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final RoleRepository roleRepository;
+
+    private final JwtUtil jwtUtil;
 
     public AuthenticationResponse login(LoginRequest request) {
 
@@ -47,8 +50,11 @@ public class AuthService {
                 .status(user.getStatus())
                 .build();
 
+        String token = jwtUtil.generateToken(user.getEmail());
+
         return AuthenticationResponse.builder()
-                .token("")
+                .token(token)
+                .type("Bearer")
                 .user(userResponse)
                 .build();
     }
