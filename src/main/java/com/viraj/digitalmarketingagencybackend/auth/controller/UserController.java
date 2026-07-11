@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/users")
@@ -16,6 +17,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @PreAuthorize("hasAuthority('user:create')")
     @PostMapping
     @Operation(summary = "Create User")
     public UserResponse createUser(

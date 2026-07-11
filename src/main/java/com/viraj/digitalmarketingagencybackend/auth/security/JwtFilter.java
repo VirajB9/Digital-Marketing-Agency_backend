@@ -1,7 +1,6 @@
 package com.viraj.digitalmarketingagencybackend.auth.security;
 
-import com.viraj.digitalmarketingagencybackend.auth.entity.User;
-import com.viraj.digitalmarketingagencybackend.auth.repository.UserRepository;
+import org.springframework.security.core.userdetails.UserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +21,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
 
-    private final UserRepository userRepository;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -47,25 +46,29 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String email = jwtUtil.extractEmail(token);
 
-        User user = userRepository
-                .findByEmail(email)
-                .orElse(null);
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        if (user != null) {
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            Collections.emptyList()
-                    );
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource()
-                            .buildDetails(request)
-            );
+            UserDetails userDetails =
+                    customUserDetailsService.loadUserByUsername(email);
 
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
+            if (userDetails != null) {
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
+                );
+
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authentication);
+            }
         }
 
         filterChain.doFilter(request, response);

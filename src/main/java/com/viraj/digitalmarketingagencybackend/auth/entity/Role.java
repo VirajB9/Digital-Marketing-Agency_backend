@@ -20,6 +20,7 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "roles")
 public class Role extends BaseEntity {
+
     @Id
     private String id;
 

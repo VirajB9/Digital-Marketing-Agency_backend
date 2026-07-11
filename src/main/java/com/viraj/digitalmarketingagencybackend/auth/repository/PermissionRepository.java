@@ -4,9 +4,8 @@ import com.viraj.digitalmarketingagencybackend.auth.enmus.PermissionType;
 import com.viraj.digitalmarketingagencybackend.auth.entity.Permission;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.Optional;
 
 public interface PermissionRepository extends MongoRepository<Permission, String> {
 
-    Optional<Permission> findByPermissionType(PermissionType permissionType);
+    boolean existsByPermissionType(PermissionType permissionType);
 }

@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "permission")
+@Document(collection = "permissions")
 public class Permission extends BaseEntity {
     @Id
     private String id;
