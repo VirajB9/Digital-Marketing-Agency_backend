@@ -32,4 +32,6 @@ public class Role extends BaseEntity {
     @Builder.Default
     private List<String> permissionIds = new ArrayList<>();
 
+    @Builder.Default
+    private boolean systemRole = false;
 }
