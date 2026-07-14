@@ -1,10 +1,11 @@
 package com.viraj.digitalmarketingagencybackend.auth.controller;
 
 import com.viraj.digitalmarketingagencybackend.auth.dto.CreateUserRequest;
-import com.viraj.digitalmarketingagencybackend.auth.dto.UserResponse;
+import com.viraj.digitalmarketingagencybackend.auth.dto.CreateUserResponse;
 import com.viraj.digitalmarketingagencybackend.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,8 +21,8 @@ public class UserController {
     @PreAuthorize("hasAuthority('user:create')")
     @PostMapping
     @Operation(summary = "Create User")
-    public UserResponse createUser(
-            @RequestBody CreateUserRequest request) {
+    public CreateUserResponse createUser(
+            @Valid @RequestBody CreateUserRequest request) {
 
         return userService.createUser(request);
     }

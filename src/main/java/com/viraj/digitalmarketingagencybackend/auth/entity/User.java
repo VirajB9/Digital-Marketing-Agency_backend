@@ -30,6 +30,7 @@ public class User extends BaseEntity {
     @Indexed(unique = true)
     private String email;
 
+    @Indexed(unique = true)
     private String phoneNumber;
 
     /**
