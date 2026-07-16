@@ -5,6 +5,7 @@ import com.viraj.digitalmarketingagencybackend.auth.enmus.UserStatus;
 import com.viraj.digitalmarketingagencybackend.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "2. User Management")
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -29,6 +31,15 @@ public class UserController {
         return userService.createUser(request);
     }
 
+        @PreAuthorize("hasAuthority('user:read')")
+        @GetMapping
+        @Operation(summary = "Get All Users")
+        public Page<UserResponse> getAllUsers(
+                Pageable pageable) {
+
+            return userService.getAllUsers(pageable);
+        }
+
     @PreAuthorize("hasAuthority('user:read')")
     @GetMapping("/{userId}")
     @Operation(summary = "Get User By Id")
@@ -36,35 +47,6 @@ public class UserController {
             @PathVariable String userId) {
 
         return userService.getUserById(userId);
-    }
-
-    @PreAuthorize("hasAuthority('user:read')")
-    @GetMapping
-    @Operation(summary = "Get All Users")
-    public Page<UserResponse> getAllUsers(
-            Pageable pageable) {
-
-        return userService.getAllUsers(pageable);
-    }
-
-    @PreAuthorize("hasAuthority('user:read')")
-    @GetMapping("/search")
-    @Operation(summary = "Search Users")
-    public Page<UserResponse> searchUsers(
-            @RequestParam String keyword,
-            Pageable pageable) {
-
-        return userService.searchUsers(keyword, pageable);
-    }
-
-    @PreAuthorize("hasAuthority('user:read')")
-    @GetMapping("/filter")
-    @Operation(summary = "Filter Users By Status")
-    public Page<UserResponse> filterUsersByStatus(
-            @RequestParam UserStatus status,
-            Pageable pageable) {
-
-        return userService.filterUsersByStatus(status, pageable);
     }
 
     @PreAuthorize("hasAuthority('user:update')")
@@ -94,5 +76,25 @@ public class UserController {
             @PathVariable String userId) {
 
         return userService.softDeleteUser(userId);
+    }
+
+    @PreAuthorize("hasAuthority('user:read')")
+    @GetMapping("/search")
+    @Operation(summary = "Search Users")
+    public Page<UserResponse> searchUsers(
+            @RequestParam String keyword,
+            Pageable pageable) {
+
+        return userService.searchUsers(keyword, pageable);
+    }
+
+    @PreAuthorize("hasAuthority('user:read')")
+    @GetMapping("/filter")
+    @Operation(summary = "Filter Users By Status")
+    public Page<UserResponse> filterUsersByStatus(
+            @RequestParam UserStatus status,
+            Pageable pageable) {
+
+        return userService.filterUsersByStatus(status, pageable);
     }
 }
