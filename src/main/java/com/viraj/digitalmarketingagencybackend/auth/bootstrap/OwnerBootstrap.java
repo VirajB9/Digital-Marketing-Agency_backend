@@ -24,7 +24,7 @@ public class OwnerBootstrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.findByEmail("owner@agency").isPresent()) {
+        if (userRepository.findByEmail("owner@agency.com").isPresent()) {
             return;
         }
 

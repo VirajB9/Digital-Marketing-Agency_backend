@@ -1,19 +1,16 @@
 package com.viraj.digitalmarketingagencybackend.auth.service;
 
-import com.viraj.digitalmarketingagencybackend.auth.dto.CreateUserRequest;
-import com.viraj.digitalmarketingagencybackend.auth.dto.CreateUserResponse;
-import com.viraj.digitalmarketingagencybackend.auth.dto.UserResponse;
+import com.viraj.digitalmarketingagencybackend.auth.dto.*;
 import com.viraj.digitalmarketingagencybackend.auth.enmus.UserStatus;
 import com.viraj.digitalmarketingagencybackend.auth.entity.Role;
 import com.viraj.digitalmarketingagencybackend.auth.entity.User;
-import com.viraj.digitalmarketingagencybackend.auth.exception.DuplicateEmailException;
-import com.viraj.digitalmarketingagencybackend.auth.exception.DuplicatePhoneException;
-import com.viraj.digitalmarketingagencybackend.auth.exception.RoleNotFoundException;
-import com.viraj.digitalmarketingagencybackend.auth.exception.UnauthorizedRoleAssignmentException;
+import com.viraj.digitalmarketingagencybackend.auth.exception.*;
 import com.viraj.digitalmarketingagencybackend.auth.repository.RoleRepository;
 import com.viraj.digitalmarketingagencybackend.auth.repository.UserRepository;
 import com.viraj.digitalmarketingagencybackend.auth.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,16 +33,15 @@ public class UserService {
 
         validateDuplicatePhone(request.getPhoneNumber());
 
-        Role role = getRoleById(request.getRoleId());
+        User currentUser = findCurrentUser();
 
-        User currentUser = getCurrentUser();
+        Role role = findRoleById(request.getRoleId());
 
         validateRoleAssignment(currentUser, role);
 
         String generatedPassword = generatePassword();
 
-        String encodedPassword =
-                passwordEncoder.encode(generatedPassword);
+        String encodedPassword = passwordEncoder.encode(generatedPassword);
 
         User user = buildUser(request, role, encodedPassword);
 
@@ -57,6 +53,86 @@ public class UserService {
                 .build();
     }
 
+    public Page<UserResponse> getAllUsers(Pageable pageable) {
+
+        Page<User> users = userRepository.findAll(pageable);
+
+        return mapToUserResponsePage(users);
+    }
+
+    public Page<UserResponse> searchUsers(String keyword, Pageable pageable) {
+
+        Page<User> users = userRepository
+                .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                        keyword,
+                        keyword,
+                        keyword,
+                        pageable
+                );
+
+        return mapToUserResponsePage(users);
+    }
+
+    public UserResponse getUserById(String userId) {
+
+        User user = findUserById(userId);
+
+        return mapUser(user);
+    }
+
+    public Page<UserResponse> filterUsersByStatus(UserStatus status, Pageable pageable) {
+
+        Page<User> users = userRepository.findByStatus(status, pageable);
+
+        return mapToUserResponsePage(users);
+    }
+
+    public UserResponse updateUser(String userId, UpdateUserRequest request) {
+
+        User user = findUserById(userId);
+
+        validatePhoneForUpdate(request.getPhoneNumber(), user.getId());
+
+        Role role = findRoleById(request.getRoleId());
+
+        User currentUser = findCurrentUser();
+
+        validateRoleAssignment(currentUser, role);
+
+        updateUserFields(user, request, role);
+
+        User updatedUser = userRepository.save(user);
+
+        return mapUser(updatedUser);
+    }
+
+    public UserResponse updateUserStatus(String userId, UpdateUserStatusRequest request) {
+
+        validateStatusUpdate(request.getStatus());
+
+        User user = findUserById(userId);
+
+        user.setStatus(request.getStatus());
+
+        User updatedUser = userRepository.save(user);
+
+        return mapUser(updatedUser);
+    }
+
+    public UserResponse softDeleteUser(String userId) {
+
+        User user = findUserById(userId);
+
+        user.setStatus(UserStatus.DELETED);
+
+        User deletedUser = userRepository.save(user);
+
+        return mapUser(deletedUser);
+    }
+
+
+
+    /** Helper Methods */
     private void validateDuplicateEmail(String email) {
 
         if (userRepository.existsByEmail(email)) {
@@ -71,66 +147,25 @@ public class UserService {
         }
     }
 
-    private Role getRoleById(String roleId) {
+    private void validatePhoneForUpdate(String phoneNumber, String userId) {
 
-        return roleRepository.findById(roleId)
-                .orElseThrow(() ->
-                        new RoleNotFoundException(roleId));
+        if (userRepository.existsByPhoneNumberAndIdNot(phoneNumber, userId)) {
+            throw new DuplicatePhoneException(phoneNumber);
+        }
     }
 
-    private User buildUser(
-            CreateUserRequest request,
-            Role role,
-            String encodedPassword) {
+    private void validateStatusUpdate(UserStatus status) {
 
-        return User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .phoneNumber(request.getPhoneNumber())
-                .password(encodedPassword)
-                .roleId(role.getId())
-                .status(UserStatus.ACTIVE)
-                .build();
+        if (status == UserStatus.DELETED) {
+            throw new InvalidUserStatusException(status);
+        }
     }
 
-    private UserResponse mapToUserResponse(
-            User user,
-            Role role) {
+    /** Validates whether the authenticated user is allowed to assign the requested role. */
+    private void validateRoleAssignment(User currentUser, Role targetRole) {
 
-        return UserResponse.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .roleName(role.getName())
-                .status(user.getStatus())
-                .build();
-    }
-
-    private User getCurrentUser() {
-
-        CustomUserDetails userDetails =
-                (CustomUserDetails) SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getPrincipal();
-        return userDetails.getUser();
-    }
-
-    /**
-     * Validates whether the authenticated user
-     * is allowed to assign the requested role.
-     */
-    private void validateRoleAssignment(
-            User currentUser,
-            Role targetRole) {
-
-        Role currentUserRole = getRoleById(currentUser.getRoleId());
-
+        Role currentUserRole = findRoleById(currentUser.getRoleId());
         String currentRole = currentUserRole.getName();
-
         String targetRoleName = targetRole.getName();
 
         switch (currentRole) {
@@ -151,10 +186,80 @@ public class UserService {
                 throw new UnauthorizedRoleAssignmentException(
                         "You are not allowed to create users"
                 );
+
             default:
                 throw new UnauthorizedRoleAssignmentException(
                         "Invalid role assignment"
                 );
         }
+    }
+
+    private User findUserById(String userId) {
+
+        return userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UserNotFoundException(userId));
+    }
+
+    private Role findRoleById(String roleId) {
+
+        return roleRepository.findById(roleId)
+                .orElseThrow(() ->
+                        new RoleNotFoundException(roleId));
+    }
+
+    private User findCurrentUser() {
+
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        return userDetails.getUser();
+    }
+
+    private User buildUser(CreateUserRequest request, Role role, String encodedPassword) {
+
+        return User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .password(encodedPassword)
+                .roleId(role.getId())
+                .status(UserStatus.ACTIVE)
+                .build();
+    }
+
+    private UserResponse mapToUserResponse(User user, Role role) {
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .roleName(role.getName())
+                .status(user.getStatus())
+                .build();
+    }
+
+    private Page<UserResponse> mapToUserResponsePage(Page<User> users) {
+
+        return users.map(this::mapUser);
+    }
+
+    private UserResponse mapUser(User user) {
+
+        Role role = findRoleById(user.getRoleId());
+
+        return mapToUserResponse(user, role);
+    }
+
+    private void updateUserFields(User user, UpdateUserRequest request, Role role) {
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setRoleId(role.getId());
     }
 }

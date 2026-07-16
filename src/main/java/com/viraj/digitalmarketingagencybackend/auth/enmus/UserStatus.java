@@ -7,5 +7,7 @@ public enum UserStatus {
 
     SUSPENDED,
 
-    LOCKED
+    LOCKED,
+
+    DELETED
 }
