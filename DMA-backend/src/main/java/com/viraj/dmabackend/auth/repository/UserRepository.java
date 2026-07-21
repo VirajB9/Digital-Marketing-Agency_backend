@@ -1,6 +1,6 @@
 package com.viraj.dmabackend.auth.repository;
 
-import com.viraj.dmabackend.auth.enmus.UserStatus;
+import com.viraj.dmabackend.auth.enums.UserStatus;
 import com.viraj.dmabackend.auth.entity.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.domain.Page;

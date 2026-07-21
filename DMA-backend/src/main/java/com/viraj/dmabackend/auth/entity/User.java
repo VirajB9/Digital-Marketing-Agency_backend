@@ -1,6 +1,6 @@
 package com.viraj.dmabackend.auth.entity;
 
-import com.viraj.dmabackend.auth.enmus.UserStatus;
+import com.viraj.dmabackend.auth.enums.UserStatus;
 import com.viraj.dmabackend.common.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

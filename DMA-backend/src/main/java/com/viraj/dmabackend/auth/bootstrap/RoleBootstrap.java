@@ -1,6 +1,6 @@
 package com.viraj.dmabackend.auth.bootstrap;
 
-import com.viraj.dmabackend.auth.enmus.PermissionType;
+import com.viraj.dmabackend.auth.enums.PermissionType;
 import com.viraj.dmabackend.auth.entity.Permission;
 import com.viraj.dmabackend.auth.entity.Role;
 import com.viraj.dmabackend.auth.repository.PermissionRepository;

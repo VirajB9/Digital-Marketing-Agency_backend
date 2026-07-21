@@ -1,6 +1,6 @@
 package com.viraj.dmabackend.auth.exception;
 
-import com.viraj.dmabackend.auth.enmus.UserStatus;
+import com.viraj.dmabackend.auth.enums.UserStatus;
 
 public class InvalidUserStatusException extends RuntimeException {
 

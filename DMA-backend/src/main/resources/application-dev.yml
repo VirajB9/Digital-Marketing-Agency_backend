@@ -1,7 +1,6 @@
 spring:
   application:
     name: digital-marketing-agency-backend
-
   data:
     mongodb:
       host: localhost
@@ -11,6 +10,7 @@ spring:
 server:
   port: 8080
 
+app:
   jwt:
-    secret: 12345678901234567890123456789012
+    secret: mysecretkeymysecretkeymysecretkey123456
     expiration: 86400000

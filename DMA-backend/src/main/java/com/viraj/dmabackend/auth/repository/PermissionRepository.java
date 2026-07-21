@@ -1,6 +1,6 @@
 package com.viraj.dmabackend.auth.repository;
 
-import com.viraj.dmabackend.auth.enmus.PermissionType;
+import com.viraj.dmabackend.auth.enums.PermissionType;
 import com.viraj.dmabackend.auth.entity.Permission;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

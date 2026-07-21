@@ -1,6 +1,14 @@
 spring:
   application:
     name: digital-marketing-agency-backend
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:86400000}

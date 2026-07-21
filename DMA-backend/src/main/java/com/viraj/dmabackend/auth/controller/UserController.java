@@ -1,7 +1,7 @@
 package com.viraj.dmabackend.auth.controller;
 
 import com.viraj.dmabackend.auth.dto.*;
-import com.viraj.dmabackend.auth.enmus.UserStatus;
+import com.viraj.dmabackend.auth.enums.UserStatus;
 import com.viraj.dmabackend.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
